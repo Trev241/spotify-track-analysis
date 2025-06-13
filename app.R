@@ -38,34 +38,41 @@ ui <- page_navbar(
   nav_panel(
     "Question 1",
     page_fillable(
-      h1("Understanding what influences the popularity of a song"), 
+      h1("What features influence the popularity of a song?"), 
       layout_columns(
         layout_columns(
           card(
             layout_columns(
               value_box(
                 "",
-                "114,000",
+                "114k",
                 "tracks across many genres",
                 theme = "bg-yellow",
+                max_height = "125px"
               ),
               value_box(
                 "",
                 "20",
                 "features describing each track",
-                theme = "bg-blue"
+                theme = "bg-blue",
+                max_height = "125px"
               ),
             ),
           ),
           card(
-            strong("Popularity Distribution"),
-            plotOutput("popularity_distribution"),
-            sliderInput(
-              "popularity_bin", 
-              "Popularity bin size", 
-              min = 0, 
-              max = 50, 
-              value = 10
+            card_header(
+              h3("Popularity Distribution"),
+            ),
+            card_body(
+              class = "d-flex justify-content-center align-items-center",
+              plotOutput("popularity_distribution"),
+              sliderInput(
+                "popularity_bin", 
+                strong("Slide to adjust bin size"), 
+                min = 0, 
+                max = 50, 
+                value = 10
+              )
             )
           ), 
           col_widths = c(12, 12)
@@ -73,34 +80,37 @@ ui <- page_navbar(
         navset_card_tab(
           nav_panel(
             "Explicity",
-            strong("Share of explicit songs"),
             layout_columns(
-              plotOutput("explicit_songs"),
-              card(
-                tableOutput("explicit_song_share"),
+              div(
+                h3("Share of explicit songs"),
+                p("The explicity of a song determines whether or not the track has explicit lyrics (true = yes it does; false = no it does not OR unknown)"),
                 selectInput(
                   "popularty_select",
-                  "Select popularity below:",
+                  strong("Select popularity below:"),
                   list(
                     "Very high" = "very high",
                     "High" = "high",
                     "Medium" = "medium",
                     "Low" = "low"
-                  )
+                  ),
                 ),
+                strong("Distribution of explicit songs"),
+                p("The table below will give you an idea of the number of explicit songs present in each popularity category."),
+                tableOutput("explicit_song_share"),
               ),
-              col_widths = c(9, 3)
+              plotOutput("explicit_songs"),
+              col_widths = c(4, 8)
             )
           ),
           nav_panel(
             "Other Factors",
-            strong("Factors affecting popularity"),
+            h3("Factors affecting popularity"),
             layout_columns(
               plotOutput("popularity_factors"),
-              card(
+              div(
                 checkboxGroupInput( 
                   "factors_group", 
-                  "Filter by factor", 
+                  strong("Filter by feature"), 
                   c( 
                     "Acousticness" = "avg_acousticness", 
                     "Danceability" = "avg_danceability", 
@@ -115,8 +125,10 @@ ui <- page_navbar(
                   selected="avg_danceability"
                 ),
                 sliderInput( 
-                  "popularity_range", "Popularity range", 
-                  min = 0, max = 100, 
+                  "popularity_range", 
+                  strong("Slide to adjust the popularity range"), 
+                  min = 0, 
+                  max = 100, 
                   value = c(25, 100) 
                 ),
               ),
@@ -162,7 +174,7 @@ server <- function(input, output) {
         )
         
         ggplot(popularity_data, aes(x = popularity, y = value, colour = name)) + 
-          geom_line(size = 2) +
+          geom_line(linewidth = 2) +
           labs(x = "Popularity", y = "Value") +
           theme(legend.position = "bottom")
       } else {
