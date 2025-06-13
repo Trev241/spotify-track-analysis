@@ -45,14 +45,14 @@ ui <- page_navbar(
             layout_columns(
               value_box(
                 "",
-                "114,000 tracks",
-                "across many genres",
+                "114,000",
+                "tracks across many genres",
                 theme = "bg-yellow",
               ),
               value_box(
                 "",
-                "20 features",
-                "describing each track",
+                "20",
+                "features describing each track",
                 theme = "bg-blue"
               ),
             ),
