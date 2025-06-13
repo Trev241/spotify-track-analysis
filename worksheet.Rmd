@@ -1,0 +1,76 @@
+---
+title: "Worksheet"
+output: html_document
+---
+
+# Initial Setup
+
+```{r}
+library(dplyr)
+```
+
+
+```{r}
+data <- read.csv(file = "data/dataset.csv")
+top_n(data, 5)
+```
+
+# Observations
+
+```{r}
+data<-
+  data %>% 
+  mutate(popularity_category = case_when(
+    popularity > 80 ~ "very high", 
+    popularity > 70 ~ "high",
+    popularity > 50 ~ "medium",
+    popularity >= 0 ~ "low"
+  ))
+```
+
+```{r}
+grouped_data <-
+  data %>%
+  group_by(popularity_category) %>%
+  summarise(
+    avg_popularity = mean(popularity),
+    avg_danceability = mean(danceability),
+    avg_energy = mean(energy),
+    avg_loudness = mean(loudness),
+    avg_tempo = mean(tempo),
+    avg_liveness = mean(liveness),
+    avg_valence = mean(valence),
+    avg_instrumentalness = mean(instrumentalness),
+    avg_acousticness = mean(acousticness),
+    avg_speechiness = mean(speechiness),
+    avg_duration = mean(duration_ms)) %>%
+  arrange(desc(avg_popularity))
+
+grouped_data
+```
+
+After grouping songs in four different popularity categories, we can observe
+the general trend of each feature in each category.
+
+A song is likely to be popular if it is **dance-able**, **loud**, **modern**,
+**at most 3 minutes long** and contains **at least some lyrics**. 
+
+(Plot a scatter plot for this)
+
+```{r}
+data %>% 
+  group_by(popularity_category, explicit) %>% 
+  summarise(
+    n = n(),
+    avg_popularity = mean(popularity, na.rm = TRUE)
+  ) %>%
+  arrange(desc(avg_popularity))
+```
+A song being explicit doesn't necessarily make it popular.
+
+```{r}
+data |>
+  select(track_genre) |>
+  distinct()
+```
+
