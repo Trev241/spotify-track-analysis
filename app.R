@@ -3,6 +3,10 @@ library(dplyr)
 library(bslib)
 library(tidyr)
 library(ggplot2)
+library(stringr)
+
+source("question_5.R")
+
 
 # Set up
 data <- read.csv(file = "data/dataset.csv")
@@ -143,7 +147,7 @@ ui <- page_navbar(
   nav_panel("Question 2", "Page B content"), 
   nav_panel("Question 3", "Page C content"), 
   nav_panel("Question 4", "Page C content"), 
-  nav_panel("Question 5", "Page C content"), 
+  question5_ui,
   title = "Spotify Tracks Dataset Analysis", 
   id = "page", 
 ) 
@@ -207,6 +211,8 @@ server <- function(input, output) {
       group_by(explicit) |>
       summarize(Count = n())
   })
+  
+  question5_server(input, output, data)
 }
 
 shinyApp(ui = ui, server = server)
