@@ -5,6 +5,7 @@ library(tidyr)
 library(ggplot2)
 library(stringr)
 
+source("question_3.R")
 source("question_5.R")
 
 
@@ -145,7 +146,7 @@ ui <- page_navbar(
     )
   ), 
   nav_panel("Question 2", "Page B content"), 
-  nav_panel("Question 3", "Page C content"), 
+  question3_ui,
   nav_panel("Question 4", "Page C content"), 
   question5_ui,
   title = "Spotify Tracks Dataset Analysis", 
@@ -212,6 +213,10 @@ server <- function(input, output) {
       summarize(Count = n())
   })
   
+  # Question 3 server
+  question3_server(input, output, data)
+  
+  # Question 5 server
   question5_server(input, output, data)
 }
 
