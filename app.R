@@ -4,13 +4,37 @@ library(bslib)
 library(tidyr)
 library(ggplot2)
 library(stringr)
+library(cld2)
+library(scales)
+library(tidyverse)
 
+# Source question modules
+source("question_2.R")
 source("question_3.R")
+source("question_4.R")
 source("question_5.R")
-
 
 # Set up
 data <- read.csv(file = "data/dataset.csv")
+
+# Language Detection for Question 4
+if (!"language" %in% colnames(data) || all(is.na(data$language))) {
+  text_source <- if ("track_name" %in% colnames(data)) {
+    data$track_name
+  } else {
+    rep("unknown", nrow(data))
+  }
+  
+  detected_lang <- tryCatch({
+    cld2::detect_language(text_source, plain_text = TRUE)
+  }, error = function(e) {
+    message("Language detection failed. Assigning 'unknown' to all rows.")
+    rep("unknown", nrow(data))
+  })
+  
+  data$language <- ifelse(is.na(detected_lang), "unknown", detected_lang)
+}
+data$language[is.na(data$language)] <- "unknown"
 
 # Question 1
 data <-
@@ -38,6 +62,10 @@ grouped_data <-
     avg_speechiness = mean(speechiness),
     avg_duration = mean(duration_ms)) %>%
   arrange(desc(avg_popularity))
+
+# Question 4 Language Labels
+language_labels_q4 <- c("en" = "English", "es" = "Spanish", "fr" = "French", "de" = "German", "it" = "Italian", "pt" = "Portuguese", "other" = "Other", "unknown" = "Unknown")
+
 
 ui <- page_navbar( 
   nav_panel(
@@ -145,15 +173,15 @@ ui <- page_navbar(
       ) 
     )
   ), 
-  nav_panel("Question 2", "Page B content"), 
+  question2_ui,
   question3_ui,
-  nav_panel("Question 4", "Page C content"), 
+  question4_ui,
   question5_ui,
   title = "Spotify Tracks Dataset Analysis", 
   id = "page", 
 ) 
 
-server <- function(input, output) {
+server <- function(input, output, session) {
     output$popularity_factors <- renderPlot({
       cols <- input$factors_group
       
@@ -212,9 +240,15 @@ server <- function(input, output) {
       group_by(explicit) |>
       summarize(Count = n())
   })
+
+  # Question 2 server
+  question2_server(input, output, data)
   
   # Question 3 server
   question3_server(input, output, data)
+  
+  # Question 4 server
+  question4_server(input, output, session, data)
   
   # Question 5 server
   question5_server(input, output, data)
