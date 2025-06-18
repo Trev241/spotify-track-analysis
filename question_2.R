@@ -2,7 +2,7 @@
 
 question2_ui <- nav_panel(
   "Question 2",
-  titlePanel("🎶 Musical Characteristics of Top 10 Artists"),
+  titlePanel("Musical Characteristics of Top 10 Artists"),
   sidebarLayout(
     sidebarPanel(
       selectInput("feature_q2", "Select Feature:",
