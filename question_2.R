@@ -6,7 +6,7 @@ question2_ui <- nav_panel(
   sidebarLayout(
     sidebarPanel(
       selectInput("feature_q2", "Select Feature:",
-                  choices = c("danceability", "energy", "valence", "tempo", "loudness", "duration (min)"),
+                  choices = c("danceability", "energy", "valence", "tempo", "loudness", "duration_min"),
                   selected = "danceability"),
       
       selectInput("chart_type_q2", "Select Chart Type:",
@@ -21,6 +21,7 @@ question2_ui <- nav_panel(
 
 question2_server <- function(input, output, data) {
   
+  # Get top 10 most popular artists
   popular_artists <- reactive({
     data %>%
       group_by(artists) %>%
@@ -32,37 +33,31 @@ question2_server <- function(input, output, data) {
       slice(1:10)
   })
 
+  # Filter dataset for only the top 10 artists and create clean duration column
   top_artist_songs <- reactive({
     top_artists <- popular_artists()$artists
-    data %>% filter(artists %in% top_artists)
+    data %>% 
+      filter(artists %in% top_artists) %>%
+      mutate(duration_min = duration_ms / 60000)  # Create clean column once here
   })
   
   output$featurePlot_q2 <- renderPlot({
-    
-    selected_feature <- switch(input$feature_q2,
-                               "duration (min)" = "duration_ms",
-                               input$feature_q2)
-    
+    selected_feature <- input$feature_q2
     plot_data <- top_artist_songs()
-    if (selected_feature == "duration_ms") {
-      plot_data <- plot_data %>%
-        mutate(`duration (min)` = duration_ms / 60000)
-      selected_feature <- "duration (min)"
-    }
     
     if (input$chart_type_q2 == "Histogram") {
       ggplot(plot_data, aes_string(x = selected_feature, fill = "artists")) +
         geom_histogram(position = "identity", alpha = 0.6, bins = 30) +
-        labs(title = paste("Histogram of", input$feature_q2, "by Artist"),
-             x = input$feature_q2, y = "Count", fill = "Artist") +
+        labs(title = paste("Histogram of", selected_feature, "by Artist"),
+             x = selected_feature, y = "Count", fill = "Artist") +
         theme_minimal() +
         theme(axis.text.x = element_text(angle = 45, hjust = 1))
       
     } else {
       ggplot(plot_data, aes_string(x = "artists", y = selected_feature, fill = "artists")) +
         geom_boxplot(alpha = 0.7) +
-        labs(title = paste("Boxplot of", input$feature_q2, "by Artist"),
-             x = "Artist", y = input$feature_q2, fill = "Artist") +
+        labs(title = paste("Boxplot of", selected_feature, "by Artist"),
+             x = "Artist", y = selected_feature, fill = "Artist") +
         theme_minimal() +
         theme(axis.text.x = element_text(angle = 45, hjust = 1))
     }
