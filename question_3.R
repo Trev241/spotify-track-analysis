@@ -87,11 +87,17 @@ question3_ui <- nav_panel(
           layout_columns(
             plotOutput("genre_comparison_plot"),
             div(
-              checkboxGroupInput( 
+              selectizeInput( 
                 "genre_comparison_select", 
                 strong("Select genres to compare"), 
                 choices = NULL,  # Will be populated in server
-                selected = NULL
+                selected = NULL,
+                multiple = TRUE,
+                options = list(
+                  placeholder = "Choose genres...",
+                  maxItems = 10,
+                  searchField = c('label', 'value')
+                )
               ),
               actionButton("select_all_genres", "Select Popular Genres"),
               br(), br(),
@@ -129,7 +135,7 @@ question3_server <- function(input, output, data) {
       selected = "pop"
     )
     
-    updateCheckboxGroupInput(
+    updateSelectizeInput(
       session = getDefaultReactiveDomain(),
       inputId = "genre_comparison_select",
       choices = genre_choices,
@@ -236,7 +242,7 @@ question3_server <- function(input, output, data) {
       head(8) %>%
       pull(track_genre)
     
-    updateCheckboxGroupInput(
+    updateSelectizeInput(
       session = getDefaultReactiveDomain(),
       inputId = "genre_comparison_select",
       selected = popular_genres
